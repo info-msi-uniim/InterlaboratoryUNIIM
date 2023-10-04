@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:InterlaboratoryUNIIM"
         xmlns:vm="clr-namespace:InterlaboratoryUNIIM.ViewModel"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="450" Width="800">
+        Title="{Binding Title}" Height="650" Width="800">
     <Window.DataContext>
         <vm:MainWindowVM/>
     </Window.DataContext>
@@ -24,8 +24,17 @@
                     <DataGridTextColumn Header="SD" Binding="{ Binding DataStandardDeviation}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button Content="СКО" Command="{Binding TestCommand}"/>
+            <Button Content="СКО" Command="{Binding TestMeanCommand}"/>
             <Label Content="{Binding TestSKO}"/>
+            <Label Content="{Binding Duration}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="MEAN"/>
+                <TextBox Text="{Binding TestSKO}" Width="200"/>
+                <Button Content="Расчитать"  Width="100"/>
+            </StackPanel>
+            
         </StackPanel>
     </Grid>
 </Window>
