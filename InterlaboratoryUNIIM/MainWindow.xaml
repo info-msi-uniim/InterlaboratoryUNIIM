@@ -6,35 +6,83 @@
         xmlns:local="clr-namespace:InterlaboratoryUNIIM"
         xmlns:vm="clr-namespace:InterlaboratoryUNIIM.ViewModel"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="650" Width="800">
+        Title="{Binding Title}" Height="800" Width="1000"
+        MinHeight="800" MinWidth="1000">
     <Window.DataContext>
         <vm:MainWindowVM/>
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="300"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
-            <Label Content="Стандартное отклонение"/>
-            <TextBox Text="{Binding StandardDeviation}"/>
-            <DataGrid ItemsSource="{Binding DataSet}" AutoGenerateColumns="False" IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Delta" Binding="{ Binding DataDelta}" Width="*"/>
-                    <DataGridTextColumn Header="SD" Binding="{ Binding DataStandardDeviation}" Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <Button Content="СКО" Command="{Binding TestMeanCommand}"/>
-            <Label Content="{Binding TestSKO}"/>
-            <Label Content="{Binding Duration}"/>
+            <GroupBox Header="Исходные данные">
+                <DataGrid ItemsSource="{Binding DataSet}" AutoGenerateColumns="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Delta" Binding="{ Binding DataDelta}" Width="*"/>
+                        <DataGridTextColumn Header="SD" Binding="{ Binding DataStandardDeviation}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
         </StackPanel>
-        <StackPanel Grid.Column="1">
+        <StackPanel Grid.Column="1" Margin="5">
+            <GroupBox Header="Условия расчета">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Стандартное отклонение"/>
+                        <TextBox Text="{Binding StandardDeviation}" Width="50" Height="20"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Количество итераций Монте-Карло"/>
+                        <TextBox Text="{Binding NumOfIteration}" Width="50" Height="20"/>
+                        <Button Content="Сформировать набор данных МК" Margin="5"/>
+                        <Label Content="{Binding Duration}" Width="50"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
             <StackPanel Orientation="Horizontal">
-                <Label Content="MEAN"/>
-                <TextBox Text="{Binding TestSKO}" Width="200"/>
-                <Button Content="Расчитать"  Width="100"/>
+                <ListView>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Алгоритм" x:Name="alg"  />
+                            <GridViewColumn Header="S/μ, %"/>
+                            <GridViewColumn Header="KCRV"/>
+                            <GridViewColumn Header="U1, %"/>
+                            <GridViewColumn Header="BIAS, %"/>
+                        </GridView>
+                    </ListView.View>               
+                   
+                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal">
+                        <Label Content="MEAN" Width="100"/>
+                        <Label Content="S/m, %"/>
+                        <TextBox Text="{Binding TestSKO}" Width="50"/>
+                        <Label Content="KCRV, %"/>
+                        <TextBox Text="{Binding TestSKO}" Width="50"/>
+                        <Label Content="U1, %"/>
+                        <TextBox Text="{Binding TestSKO}" Width="50"/>
+                        <Button Content="Расчитать"  Width="70"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
-            
         </StackPanel>
     </Grid>
 </Window>
