@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -27,18 +26,9 @@ namespace InterlaboratoryUNIIM.ViewModel
         [ObservableProperty]
         private ObservableCollection<DataUNIIM> _DataSet;
 
-        //partial void OnDataSetChanging(ObservableCollection<DataUNIIM> value)
-        //        {
-        //    NumOfParticipant = value.Count;
-        //}
-
-
         [ObservableProperty]
         private ObservableCollection<ResultALG> _ResultALGs;
         #endregion
-
-        [ObservableProperty]
-        private double _TestSKO;
 
         [RelayCommand]
         public void CalculateALL()
@@ -58,7 +48,6 @@ namespace InterlaboratoryUNIIM.ViewModel
             ResultALGs.Add(new Algorithms().MandelPaule(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().PMA1(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().PMA2(DataSet.ToList(), ref MCDataset, Mu));
-
         }
 
         public MainWindowVM()
@@ -69,6 +58,7 @@ namespace InterlaboratoryUNIIM.ViewModel
             DataSet = new DatasetUNIIM().DataSet;
             NumOfParticipant = DataSet.Count;
             ResultALGs = new();
+
             DataSet.CollectionChanged += DataSet_CollectionChanged;
 
             CalculateALL();

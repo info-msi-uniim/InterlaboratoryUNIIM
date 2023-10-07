@@ -99,7 +99,7 @@ namespace InterlaboratoryUNIIM.Algorithm
 
                 }
             }
-         
+
 
             stopwatch.Stop();
             Result.Duration = stopwatch.ElapsedMilliseconds;
