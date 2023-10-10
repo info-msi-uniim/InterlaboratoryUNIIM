@@ -9,6 +9,23 @@ namespace InterlaboratoryUNIIM.Algorithm
 {
     public class Algorithms
     {
+        public double BIAS(double KCRV, double Mu)
+        {
+            return Math.Abs(Mu - KCRV) / Mu * 100;
+        }
+        public double S_Mu(double KCRV, double Mu, List<DataUNIIM> Data)
+        {
+            double Result;
+            double Summ = 0;
+            foreach (var item in Data)
+            {
+                Summ += Math.Pow((item.Data - Mu), 2);
+            }
+            Result = 1 / Mu * Math.Sqrt(Summ) / (Data.Count - 1) * 100;
+
+            return Result;
+        }
+
         public ResultALG Mean(List<DataUNIIM> Data, ref double[,] MCDataset, double Mu)
         {
             Stopwatch stopwatch = new Stopwatch();
@@ -17,6 +34,8 @@ namespace InterlaboratoryUNIIM.Algorithm
             Result.Algorithm = Algorithm.MEAN;
             Result.KCRV = Statistics.Mean(Data.Select(d => d.Data).ToArray());
             Result.U1 = Statistics.StandardDeviation(Data.Select(d => d.Data).ToArray());
+            Result.BIAS = BIAS(Result.KCRV, Mu);
+            Result.S_mu = S_Mu(Result.KCRV, Mu, Data);
 
             int width = MCDataset.GetLength(1);
             int height = MCDataset.GetLength(0);
@@ -52,6 +71,8 @@ namespace InterlaboratoryUNIIM.Algorithm
             ResultALG Result = new ResultALG();
             Result.Algorithm = Algorithm.MEDIAN;
             Result.KCRV = Statistics.Median(Data.Select(d => d.Data).ToArray());
+            Result.BIAS = BIAS(Result.KCRV, Mu);
+            Result.S_mu = S_Mu(Result.KCRV, Mu, Data);
             // Result.U1 = Statistics.StandardDeviation(Data.Select(d => d.Data).ToArray());
 
 
@@ -91,13 +112,26 @@ namespace InterlaboratoryUNIIM.Algorithm
             int height = MCDataset.GetLength(0);
             Result.Algorithm = Algorithm.W_MEAN;
 
-            List<double> RowList = new List<double>(width);
-            void Calc(List<double> Row)
-            {
-                foreach (double row in Row)
-                {
+            //List<double> RowList = new List<double>(width);
 
+            void Calc_W(List<double> Data, List<double> SD)
+            {
+                double Wi;
+                double Summ;
+
+
+                foreach (double Xi in Data)
+                {
+                    Wi = 0;
+                    Summ = 0;
+                    foreach (double Ui in SD)
+                    {
+                        Summ += 1 / Math.Pow(Ui, 2);
+                    }
+                    Wi = 1 /Data.IndexOf(Xi);
                 }
+
+
             }
 
 

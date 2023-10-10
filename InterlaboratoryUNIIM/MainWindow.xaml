@@ -16,67 +16,71 @@
             <ColumnDefinition Width="300"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0">
-            <GroupBox Header="Исходные данные" Height="560">
-                <DataGrid ItemsSource="{Binding DataSet}" AutoGenerateColumns="False" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="Исходные данные">
+            <Grid>
+                <DataGrid  ItemsSource="{Binding DataSet}" AutoGenerateColumns="False" Margin="5" VerticalScrollBarVisibility="Visible">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Лаб." Binding="{ Binding ParticipantName}" Width="*"/>
-                        <DataGridTextColumn Header="Delta" Binding="{ Binding Data}" Width="*"/>
+                        <DataGridTextColumn Header="u(x)" Binding="{ Binding Data}" Width="*"/>
                         <DataGridTextColumn Header="SD" Binding="{ Binding DataStandardDeviation}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
-            </GroupBox>
-        </StackPanel>
-        <Grid Grid.Column="1">
+            </Grid>
+        </GroupBox>
+        <Grid Grid.Column="1" Grid.Row="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Margin="5">
-            <GroupBox Header="Условия расчета">
-                <StackPanel CanVerticallyScroll="True">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Число учасников:"/>
-                        <Label Content="{Binding NumOfParticipant}"/>
+                <GroupBox Header="Условия расчета">
+                    <StackPanel CanVerticallyScroll="True">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Число учасников:"/>
+                            <Label Content="{Binding NumOfParticipant}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Стандартное отклонение:"/>
+                            <TextBox Text="{Binding StandardDeviation}" Width="50" Height="20"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Опорное значение (μ):"/>
+                            <TextBox Text="{Binding Mu}" Width="50" Height="20"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Количество итераций Монте-Карло:"/>
+                            <TextBox Text="{Binding NumOfIteration}" Width="50" Height="20"/>
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Стандартное отклонение:"/>
-                        <TextBox Text="{Binding StandardDeviation}" Width="50" Height="20"/>
+                </GroupBox>
+                <GroupBox Header="Результаты">
+                    <StackPanel>
+                        <DataGrid ItemsSource="{Binding ResultALGs}" AutoGenerateColumns="False" IsReadOnly="True" Margin="5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Алгоритм" Binding="{Binding Algorithm}" />
+                                <DataGridTextColumn Header="S/μ, %" Binding="{Binding S_mu}"/>
+                                <DataGridTextColumn Header="KCRV" Binding="{Binding KCRV}"/>
+                                <DataGridTextColumn Header="U1, %" Binding="{Binding U1}"/>
+                                <DataGridTextColumn Header="BIAS, %" Binding="{Binding BIAS, StringFormat={}{0:N4}}"/>
+                                <DataGridTextColumn Header="KCRV MC, %" Binding="{Binding KCRVMC}"/>
+                                <DataGridTextColumn Header="U1 MC, %" Binding="{Binding U1MC}"/>
+                                <DataGridTextColumn Header="время, мс" Binding="{Binding Duration}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Опорное значение:"/>
-                        <TextBox Text="{Binding Mu}" Width="50" Height="20"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Количество итераций Монте-Карло:"/>
-                        <TextBox Text="{Binding NumOfIteration}" Width="50" Height="20"/>
-                    </StackPanel>
-                </StackPanel>
-            </GroupBox>
-            <GroupBox Header="Результаты">
-                <StackPanel>
-                    <DataGrid ItemsSource="{Binding ResultALGs}" AutoGenerateColumns="False" IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Алгоритм" Binding="{Binding Algorithm}" />
-                            <DataGridTextColumn Header="S/μ, %" Binding="{Binding S_mu}"/>
-                            <DataGridTextColumn Header="KCRV" Binding="{Binding KCRV}"/>
-                            <DataGridTextColumn Header="U1, %" Binding="{Binding U1}"/>
-                            <DataGridTextColumn Header="BIAS, %" Binding="{Binding BIAS}"/>
-                            <DataGridTextColumn Header="KCRV MC, %" Binding="{Binding KCRVMC}"/>
-                            <DataGridTextColumn Header="U1 MC, %" Binding="{Binding U1MC}"/>
-                            <DataGridTextColumn Header="время, мс" Binding="{Binding Duration}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                   
-                </StackPanel>
-            </GroupBox>
-        </StackPanel>
-            <Canvas Grid.Row="1">
-                <Button x:Name="ButtonClose" Content="Закрыть" Click="ButtonClose_Click"
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+        <Canvas Grid.Row="1" Grid.ColumnSpan="2">
+            <Button x:Name="ButtonClose" Content="Закрыть" Click="ButtonClose_Click"
                         Canvas.Right="0" Width="100" Margin="5"/>
-                <Button Content="Выполнить расчет" Command="{Binding CalculateALLCommand}" 
+            <Button Content="Выполнить расчет" Command="{Binding CalculateALLCommand}" 
                          Canvas.Right="130" Width="120" Margin="5"/>
-            </Canvas>
-        </Grid>       
+        </Canvas>
     </Grid>
 </Window>
