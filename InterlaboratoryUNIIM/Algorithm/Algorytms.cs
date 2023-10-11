@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 using MathNet.Numerics.Statistics;
 
@@ -13,7 +14,7 @@ namespace InterlaboratoryUNIIM.Algorithm
         {
             return Math.Abs(Mu - KCRV) / Mu * 100;
         }
-        public double S_Mu(double KCRV, double Mu, List<DataUNIIM> Data)
+        public double S_Mu(double M, double Mu, List<DataUNIIM> Data)
         {
             double Result;
             double Summ = 0;
@@ -21,25 +22,34 @@ namespace InterlaboratoryUNIIM.Algorithm
             {
                 Summ += Math.Pow((item.Data - Mu), 2);
             }
-            Result = 1 / Mu * Math.Sqrt(Summ) / (Data.Count - 1) * 100;
+            Result = 1.0 / Mu * Math.Sqrt(Summ / (M - 1)) * 100;
 
             return Result;
         }
 
-        public ResultALG Mean(List<DataUNIIM> Data, ref double[,] MCDataset, double Mu)
+        public ResultALG Mean(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            ResultALG Result = new ResultALG();
-            Result.Algorithm = Algorithm.MEAN;
-            Result.KCRV = Statistics.Mean(Data.Select(d => d.Data).ToArray());
-            Result.U1 = Statistics.StandardDeviation(Data.Select(d => d.Data).ToArray());
-            Result.BIAS = BIAS(Result.KCRV, Mu);
-            Result.S_mu = S_Mu(Result.KCRV, Mu, Data);
 
+            ResultALG Result = new ResultALG();
             int width = MCDataset.GetLength(1);
             int height = MCDataset.GetLength(0);
-            //List<double> ArrayList = new List<double>(width * height);
+            int m = DataUNIIM.Count;
+
+
+            double U1(List<DataUNIIM> DataUNIIM, double m)
+            {
+                return (1.0 / m) * Statistics.StandardDeviation(DataUNIIM.Select(d => d.Data).ToArray()) * 100;
+            }
+
+            Result.Algorithm = Algorithm.MEAN;
+            Result.KCRV = Statistics.Mean(DataUNIIM.Select(d => d.Data).ToArray());
+            Result.U1 = U1(DataUNIIM, m);
+
+            Result.BIAS = BIAS(Result.KCRV, Mu);
+            Result.S_mu = S_Mu(height, Mu, DataUNIIM);
+
             List<double> KCRVList = new List<double>(width);
             List<double> SDList = new List<double>(height);
             List<double> RowList = new List<double>(width);
@@ -49,7 +59,6 @@ namespace InterlaboratoryUNIIM.Algorithm
                 RowList.Clear();
                 for (int j = 0; j < width; j++)
                 {
-                    //  ArrayList.Add(MCDataset[i, j]);
                     RowList.Add(MCDataset[i, j]);
                 }
                 KCRVList.Add(Statistics.Mean(RowList.ToArray()));
@@ -64,20 +73,22 @@ namespace InterlaboratoryUNIIM.Algorithm
             return Result;
         }
 
-        public ResultALG Median(List<DataUNIIM> Data, ref double[,] MCDataset, double Mu)
+        public ResultALG Median(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             ResultALG Result = new ResultALG();
+            int width = MCDataset.GetLength(1);
+            int height = MCDataset.GetLength(0);
+
             Result.Algorithm = Algorithm.MEDIAN;
-            Result.KCRV = Statistics.Median(Data.Select(d => d.Data).ToArray());
+            Result.KCRV = Statistics.Median(DataUNIIM.Select(d => d.Data).ToArray());
             Result.BIAS = BIAS(Result.KCRV, Mu);
-            Result.S_mu = S_Mu(Result.KCRV, Mu, Data);
+            Result.S_mu = S_Mu(height, Mu, DataUNIIM);
             // Result.U1 = Statistics.StandardDeviation(Data.Select(d => d.Data).ToArray());
 
 
-            int width = MCDataset.GetLength(1);
-            int height = MCDataset.GetLength(0);
+
             List<double> KCRVList = new List<double>(width);
             List<double> SDList = new List<double>(height);
             List<double> RowList = new List<double>(width);
@@ -103,36 +114,50 @@ namespace InterlaboratoryUNIIM.Algorithm
             return Result;
         }
 
-        public ResultALG W_Mean(List<DataUNIIM> Data, ref double[,] MCDataset, double Mu)
+        public ResultALG W_Mean(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
+
+            double CalcXu(List<DataUNIIM> tmpList)
+            {
+                double xu = 0;
+                double wi = 0;
+                double summ = 0;
+                foreach (DataUNIIM xi in tmpList)
+                {
+                    wi = 0;
+                    summ = 0;
+                    foreach (DataUNIIM ui in tmpList)
+                    {
+                        summ += 1.0 / Math.Pow(ui.DataStandardDeviation, 2);
+                    }
+                    wi = 1.0 / Math.Pow(xi.DataStandardDeviation, 2) / summ;
+                    xu += wi * xi.Data;
+                }
+                return xu;
+            }
+
+            double U1(List<DataUNIIM> tmpList)
+            {
+                double U1;
+                double summ = 0;
+                foreach (DataUNIIM ui in tmpList)
+                {
+                    summ += 1.0 / Math.Pow(ui.DataStandardDeviation, 2);
+                }
+                U1 = Math.Sqrt( summ); 
+                return U1;
+            }
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             ResultALG Result = new ResultALG();
             int width = MCDataset.GetLength(1);
             int height = MCDataset.GetLength(0);
             Result.Algorithm = Algorithm.W_MEAN;
-
-            //List<double> RowList = new List<double>(width);
-
-            void Calc_W(List<double> Data, List<double> SD)
-            {
-                double Wi;
-                double Summ;
-
-
-                foreach (double Xi in Data)
-                {
-                    Wi = 0;
-                    Summ = 0;
-                    foreach (double Ui in SD)
-                    {
-                        Summ += 1 / Math.Pow(Ui, 2);
-                    }
-                    Wi = 1 /Data.IndexOf(Xi);
-                }
-
-
-            }
+            Result.KCRV = CalcXu(DataUNIIM);
+            Result.BIAS = BIAS(Result.KCRV, Mu);
+            Result.S_mu = S_Mu(height, Mu, DataUNIIM);
+            Result.U1 = U1(DataUNIIM);
 
 
             stopwatch.Stop();

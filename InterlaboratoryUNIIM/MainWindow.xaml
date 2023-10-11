@@ -25,8 +25,8 @@
                 <DataGrid  ItemsSource="{Binding DataSet}" AutoGenerateColumns="False" Margin="5" VerticalScrollBarVisibility="Visible">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Лаб." Binding="{ Binding ParticipantName}" Width="*"/>
-                        <DataGridTextColumn Header="u(x)" Binding="{ Binding Data}" Width="*"/>
-                        <DataGridTextColumn Header="SD" Binding="{ Binding DataStandardDeviation}" Width="*"/>
+                        <DataGridTextColumn Header="xi" Binding="{ Binding Data}" Width="*"/>
+                        <DataGridTextColumn Header="u(xi)" Binding="{ Binding DataStandardDeviation}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
