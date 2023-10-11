@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using TridentGoalSeek;
 
 using MathNet.Numerics.Statistics;
+using System.Security.Cryptography;
+using System.Runtime.Intrinsics;
 
 namespace InterlaboratoryUNIIM.Algorithm
 {
-    public class Algorithms
+    public class Algorithms 
     {
+        #region Общие для всех
         public double BIAS(double KCRV, double Mu)
         {
             return Math.Abs(Mu - KCRV) / Mu * 100;
@@ -26,6 +30,7 @@ namespace InterlaboratoryUNIIM.Algorithm
 
             return Result;
         }
+        #endregion
 
         public ResultALG Mean(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
@@ -87,7 +92,7 @@ namespace InterlaboratoryUNIIM.Algorithm
                 {
                     tmpMed.Add(Math.Abs(xi.Data - MEDx));
                 }
-                U1 = Math.PI/(2*m)*1.483*Statistics.Median(tmpMed)*100.0;
+                U1 = Math.PI / (2 * m) * 1.483 * Statistics.Median(tmpMed) * 100.0;
 
                 return U1;
             }
@@ -161,7 +166,7 @@ namespace InterlaboratoryUNIIM.Algorithm
                 {
                     summ += 1.0 / Math.Pow(ui.DataStandardDeviation, 2);
                 }
-                U1 = Math.Sqrt( summ); 
+                U1 = Math.Sqrt(summ);
                 return U1;
             }
 
@@ -188,6 +193,18 @@ namespace InterlaboratoryUNIIM.Algorithm
             stopwatch.Start();
             ResultALG Result = new ResultALG();
             Result.Algorithm = Algorithm.DERSIMONIAN;
+
+            //if (double.TryParse(new GSExample().Result, out Result.KCRV))
+            //{
+            //    // return 0;
+            //}
+
+            Result.KCRV = Convert.ToDouble(new GSExample().Result);
+
+
+            //var myAlgorithm = new Calculate(123);
+            //var goalSeeker = new GoalSeek(myAlgorithm);
+
             stopwatch.Stop();
             Result.Duration = stopwatch.ElapsedMilliseconds;
             return Result;
@@ -252,6 +269,6 @@ namespace InterlaboratoryUNIIM.Algorithm
             Result.Duration = stopwatch.ElapsedMilliseconds;
             return Result;
         }
-
+              
     }
 }
