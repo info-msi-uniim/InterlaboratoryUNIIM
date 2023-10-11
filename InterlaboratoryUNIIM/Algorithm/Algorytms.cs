@@ -75,6 +75,23 @@ namespace InterlaboratoryUNIIM.Algorithm
 
         public ResultALG Median(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
+
+            double U1(List<DataUNIIM> DataUNIIM)
+            {
+                double U1 = 0;
+                double MEDx = Statistics.Median(DataUNIIM.Select(d => d.Data).ToArray());
+                double m = DataUNIIM.Count();
+                List<double> tmpMed = new();
+
+                foreach (DataUNIIM xi in DataUNIIM)
+                {
+                    tmpMed.Add(Math.Abs(xi.Data - MEDx));
+                }
+                U1 = Math.PI/(2*m)*1.483*Statistics.Median(tmpMed)*100.0;
+
+                return U1;
+            }
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             ResultALG Result = new ResultALG();
@@ -85,7 +102,7 @@ namespace InterlaboratoryUNIIM.Algorithm
             Result.KCRV = Statistics.Median(DataUNIIM.Select(d => d.Data).ToArray());
             Result.BIAS = BIAS(Result.KCRV, Mu);
             Result.S_mu = S_Mu(height, Mu, DataUNIIM);
-            // Result.U1 = Statistics.StandardDeviation(Data.Select(d => d.Data).ToArray());
+            Result.U1 = U1(DataUNIIM);
 
 
 
