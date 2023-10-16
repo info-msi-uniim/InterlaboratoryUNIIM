@@ -11,12 +11,12 @@ using System.Runtime.Intrinsics;
 
 namespace InterlaboratoryUNIIM.Algorithm
 {
-    public class Algorithms 
+    public class Algorithms
     {
         #region Общие для всех
         public double BIAS(double KCRV, double Mu)
         {
-            return Math.Abs(Mu - KCRV) / Mu * 100;
+            return Math.Abs(Mu - KCRV) / Mu * 100d;
         }
         public double S_Mu(double M, double Mu, List<DataUNIIM> Data)
         {
@@ -26,7 +26,7 @@ namespace InterlaboratoryUNIIM.Algorithm
             {
                 Summ += Math.Pow((item.Data - Mu), 2);
             }
-            Result = 1.0 / Mu * Math.Sqrt(Summ / (M - 1)) * 100;
+            Result = 1d / Mu * Math.Sqrt(Summ / (M - 1d)) * 100d;
 
             return Result;
         }
@@ -45,7 +45,7 @@ namespace InterlaboratoryUNIIM.Algorithm
 
             double U1(List<DataUNIIM> DataUNIIM, double m)
             {
-                return (1.0 / m) * Statistics.StandardDeviation(DataUNIIM.Select(d => d.Data).ToArray()) * 100;
+                return Math.Sqrt((1d / m) * Statistics.StandardDeviation(DataUNIIM.Select(d => d.Data).ToArray()) * 100d);
             }
 
             Result.Algorithm = Algorithm.MEAN;
@@ -92,7 +92,7 @@ namespace InterlaboratoryUNIIM.Algorithm
                 {
                     tmpMed.Add(Math.Abs(xi.Data - MEDx));
                 }
-                U1 = Math.PI / (2 * m) * 1.483 * Statistics.Median(tmpMed) * 100.0;
+                U1 = Math.Sqrt(Math.PI / (2d * m) * 1.483d * Statistics.Median(tmpMed) * 100d);
 
                 return U1;
             }
@@ -164,7 +164,7 @@ namespace InterlaboratoryUNIIM.Algorithm
                 double summ = 0;
                 foreach (DataUNIIM ui in tmpList)
                 {
-                    summ += 1.0 / Math.Pow(ui.DataStandardDeviation, 2);
+                    summ += 1d / Math.Pow(ui.DataStandardDeviation, 2);
                 }
                 U1 = Math.Sqrt(summ);
                 return U1;
@@ -199,7 +199,7 @@ namespace InterlaboratoryUNIIM.Algorithm
             //    // return 0;
             //}
 
-            Result.KCRV = Convert.ToDouble(new GSExample().Result);
+
 
 
             //var myAlgorithm = new Calculate(123);
@@ -241,6 +241,8 @@ namespace InterlaboratoryUNIIM.Algorithm
             ResultALG Result = new ResultALG();
             Result.Algorithm = Algorithm.MANDEL_PAULE;
 
+            Result.KCRV = Convert.ToDouble(new GSExample().Result);
+
             stopwatch.Stop();
             Result.Duration = stopwatch.ElapsedMilliseconds;
             return Result;
@@ -269,6 +271,6 @@ namespace InterlaboratoryUNIIM.Algorithm
             Result.Duration = stopwatch.ElapsedMilliseconds;
             return Result;
         }
-              
+
     }
 }
