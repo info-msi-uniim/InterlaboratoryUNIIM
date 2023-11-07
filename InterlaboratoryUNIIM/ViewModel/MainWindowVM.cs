@@ -40,9 +40,9 @@ namespace InterlaboratoryUNIIM.ViewModel
             double[,] MCDataset = new ArrayMC().Get(DataSet.ToList(), CountIteration, SD);
 
             ResultALGs.Add(new Algorithms().Mean(DataSet.ToList(), ref MCDataset, Mu));
-            ResultALGs.Add(new Algorithms().Median(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().W_Mean(DataSet.ToList(), ref MCDataset, Mu));
-            ResultALGs.Add(new Algorithms().Dersimonian(DataSet.ToList(), ref MCDataset, Mu));
+            ResultALGs.Add(new Algorithms().Median(DataSet.ToList(), ref MCDataset, Mu));
+            ResultALGs.Add(new Algorithms().DerSimonian(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().Vaf(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().HuberH15(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().MandelPaule(DataSet.ToList(), ref MCDataset, Mu));

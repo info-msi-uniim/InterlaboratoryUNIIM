@@ -8,6 +8,8 @@ using TridentGoalSeek;
 using MathNet.Numerics.Statistics;
 using System.Security.Cryptography;
 using System.Runtime.Intrinsics;
+using System.Security.Cryptography.X509Certificates;
+using System.Windows.Media.Media3D;
 
 namespace InterlaboratoryUNIIM.Algorithm
 {
@@ -32,6 +34,27 @@ namespace InterlaboratoryUNIIM.Algorithm
         }
         #endregion
 
+        #region расчет для W Mean и Der Simonian
+        double WMeanCalcXu(List<DataUNIIM> tmpList)
+        {
+            double xu = 0;
+            double wi = 0;
+            double summ = 0;
+            foreach (DataUNIIM xi in tmpList)
+            {
+                wi = 0;
+                summ = 0;
+                foreach (DataUNIIM ui in tmpList)
+                {
+                    summ += 1.0 / Math.Pow(ui.DataStandardDeviation, 2);
+                }
+                wi = 1.0 / Math.Pow(xi.DataStandardDeviation, 2) / summ;
+                xu += wi * xi.Data;
+            }
+            return xu;
+        }
+
+        #endregion
         public ResultALG Mean(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
             Stopwatch stopwatch = new Stopwatch();
@@ -139,25 +162,6 @@ namespace InterlaboratoryUNIIM.Algorithm
         public ResultALG W_Mean(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
 
-            double CalcXu(List<DataUNIIM> tmpList)
-            {
-                double xu = 0;
-                double wi = 0;
-                double summ = 0;
-                foreach (DataUNIIM xi in tmpList)
-                {
-                    wi = 0;
-                    summ = 0;
-                    foreach (DataUNIIM ui in tmpList)
-                    {
-                        summ += 1.0 / Math.Pow(ui.DataStandardDeviation, 2);
-                    }
-                    wi = 1.0 / Math.Pow(xi.DataStandardDeviation, 2) / summ;
-                    xu += wi * xi.Data;
-                }
-                return xu;
-            }
-
             double U1(List<DataUNIIM> tmpList)
             {
                 double U1;
@@ -176,7 +180,7 @@ namespace InterlaboratoryUNIIM.Algorithm
             int width = MCDataset.GetLength(1);
             int height = MCDataset.GetLength(0);
             Result.Algorithm = Algorithm.W_MEAN;
-            Result.KCRV = CalcXu(DataUNIIM);
+            Result.KCRV = WMeanCalcXu(DataUNIIM);
             Result.BIAS = BIAS(Result.KCRV, Mu);
             Result.S_mu = S_Mu(height, Mu, DataUNIIM);
             Result.U1 = U1(DataUNIIM);
@@ -187,7 +191,7 @@ namespace InterlaboratoryUNIIM.Algorithm
             return Result;
         }
 
-        public ResultALG Dersimonian(List<DataUNIIM> Data, ref double[,] MCDataset, double Mu)
+        public ResultALG DerSimonian(List<DataUNIIM> Data, ref double[,] MCDataset, double Mu)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -229,6 +233,67 @@ namespace InterlaboratoryUNIIM.Algorithm
             ResultALG Result = new ResultALG();
             Result.Algorithm = Algorithm.HUBER_H15;
 
+
+            double k = 1.345d;
+            //double start = WMeanCalcXu(Data);
+            //double start = Statistics.Mean(Data.Select(d=>d.Data));
+            double start = 9.6000d;
+
+
+            Tuple<double, double> HubTmp;
+            Tuple<double, double> HubTmp2;
+
+            Tuple<double, double> HuberIteration(double K, double Start)
+            {
+                double sigma;
+                double WiSumm;
+                double X1;
+
+                List<double> di = new();
+                List<double> Wi = new();
+                List<double> WiXi = new();
+                foreach (DataUNIIM data in Data)
+                {
+                    di.Add(Math.Abs(data.Data - Start));
+                }
+                sigma = 1.483d * Statistics.Median(di);
+
+                foreach (DataUNIIM data in Data)
+                {
+                    Wi.Add(Math.Min(K * sigma / Math.Abs(data.Data - Start), 1d));
+                }
+                WiSumm = Wi.Sum();
+
+                foreach (DataUNIIM data in Data)
+                {
+                    WiXi.Add(data.Data * Wi[Data.IndexOf(data)]);
+                }
+                X1 = WiXi.Sum() / WiSumm;
+
+                return Tuple.Create(sigma, X1);
+            }
+
+
+            HubTmp = HuberIteration(k, start);
+
+            bool stop = true;
+            do
+            {
+                HubTmp2 = HuberIteration(k, HubTmp.Item2);
+                if (HubTmp.Item2 != HubTmp2.Item2)
+                {
+                    HubTmp = HubTmp2;
+                }
+                else { stop = false; }
+
+            }
+            while (stop);
+
+
+            Result.KCRV = HubTmp2.Item2;
+            Result.U1 = HubTmp2.Item1/Math.Sqrt(Math.E);
+            Result.BIAS = 0;
+            Result.S_mu = 0;
             stopwatch.Stop();
             Result.Duration = stopwatch.ElapsedMilliseconds;
             return Result;
