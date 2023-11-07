@@ -45,7 +45,7 @@ namespace InterlaboratoryUNIIM.Algorithm
 
             double U1(List<DataUNIIM> DataUNIIM, double m)
             {
-                return Math.Sqrt((1d / m) * Statistics.StandardDeviation(DataUNIIM.Select(d => d.Data).ToArray()));
+                return Statistics.StandardDeviation(DataUNIIM.Select(d => d.Data).ToArray()) / Math.Sqrt(m);
             }
 
             Result.Algorithm = Algorithm.MEAN;
@@ -92,7 +92,7 @@ namespace InterlaboratoryUNIIM.Algorithm
                 {
                     tmpMed.Add(Math.Abs(xi.Data - MEDx));
                 }
-                U1 = Math.Sqrt(Math.PI / (2d * m) * Math.Pow(1.483d * Statistics.Median(tmpMed),2) );
+                U1 = Math.Sqrt(Math.PI * Math.Pow(1.483d * Statistics.Median(tmpMed), 2) / 2 / m);
 
                 return U1;
             }
@@ -166,7 +166,7 @@ namespace InterlaboratoryUNIIM.Algorithm
                 {
                     summ += 1d / Math.Pow(ui.DataStandardDeviation, 2);
                 }
-                U1 = Math.Sqrt(1d/summ);
+                U1 = Math.Sqrt(1d / summ);
                 return U1;
             }
 
