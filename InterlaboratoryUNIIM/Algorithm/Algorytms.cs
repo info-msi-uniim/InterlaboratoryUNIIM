@@ -55,6 +55,7 @@ namespace InterlaboratoryUNIIM.Algorithm
         }
 
         #endregion
+        
         public ResultALG Mean(List<DataUNIIM> DataUNIIM, ref double[,] MCDataset, double Mu)
         {
             Stopwatch stopwatch = new Stopwatch();
@@ -306,7 +307,7 @@ namespace InterlaboratoryUNIIM.Algorithm
             ResultALG Result = new ResultALG();
             Result.Algorithm = Algorithm.MANDEL_PAULE;
 
-            Result.KCRV = Convert.ToDouble(new GSExample().Result);
+            //Result.KCRV = Convert.ToDouble(new GSExample().Result);
 
             stopwatch.Stop();
             Result.Duration = stopwatch.ElapsedMilliseconds;
