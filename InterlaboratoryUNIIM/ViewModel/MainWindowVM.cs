@@ -1,10 +1,19 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.Serialization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using InterlaboratoryUNIIM.Algorithm;
+
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Legends;
+using OxyPlot.Series;
+
 #nullable disable
 namespace InterlaboratoryUNIIM.ViewModel
 {
@@ -30,6 +39,9 @@ namespace InterlaboratoryUNIIM.ViewModel
         private ObservableCollection<ResultALG> _ResultALGs;
         #endregion
 
+        public PlotModel DrawingModel { get; set; }
+
+
         [RelayCommand]
         public void CalculateALL()
         {
@@ -48,6 +60,7 @@ namespace InterlaboratoryUNIIM.ViewModel
             ResultALGs.Add(new Algorithms().MandelPaule(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().PMA1(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().PMA2(DataSet.ToList(), ref MCDataset, Mu));
+            DrawingPlot();
         }
 
         public MainWindowVM()
@@ -62,11 +75,56 @@ namespace InterlaboratoryUNIIM.ViewModel
             DataSet.CollectionChanged += DataSet_CollectionChanged;
 
             CalculateALL();
+            DrawingPlot();
+
         }
 
         private void DataSet_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             NumOfParticipant = DataSet.Count;
         }
+
+        private void DrawingPlot()
+        {
+            DrawingModel = new PlotModel { Title = "Графики" };
+
+            //DrawingModel.Series.Add(new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)"));
+            var categoryAxis = new CategoryAxis
+            {
+                Position = AxisPosition.Bottom,
+                Key = "y1",
+                Title = "Номер участника"
+            };
+            var valueAxis1 = new LinearAxis
+            {
+                Title = "Результаты участников",
+                Position = AxisPosition.Left,
+                MinimumPadding = 0.06,
+                MaximumPadding = 0.06,
+                ExtraGridlines = new[] { 0d },
+                Key = "x1"
+            };
+            DrawingModel.Axes.Add(categoryAxis);
+            DrawingModel.Axes.Add(valueAxis1);
+            ErrorBarSeries ErrorData = new ErrorBarSeries()
+            {
+                XAxisKey = "x1",
+                YAxisKey = "y1",
+                Font = "Arial",
+                FontSize = 1,
+                TextColor = OxyColors.Black,
+               FillColor = OxyColors.Aqua
+            };
+
+
+
+            foreach (var item in DataSet)
+            {
+                ErrorData.Items.Add(new ErrorBarItem { Value = item.Data, Error = item.DataStandardDeviation });
+            }
+
+            DrawingModel.Series.Add(ErrorData);
+        }
+
     }
 }
