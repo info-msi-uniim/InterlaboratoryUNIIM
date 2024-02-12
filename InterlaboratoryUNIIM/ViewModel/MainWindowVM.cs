@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using InterlaboratoryUNIIM.Algorithm;
 
+using Microsoft.VisualBasic;
+
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
-using OxyPlot.Legends;
 using OxyPlot.Series;
+
 
 #nullable disable
 namespace InterlaboratoryUNIIM.ViewModel
@@ -41,7 +43,6 @@ namespace InterlaboratoryUNIIM.ViewModel
 
         public PlotModel DrawingModel { get; set; }
 
-
         [RelayCommand]
         public void CalculateALL()
         {
@@ -60,7 +61,7 @@ namespace InterlaboratoryUNIIM.ViewModel
             ResultALGs.Add(new Algorithms().MandelPaule(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().PMA1(DataSet.ToList(), ref MCDataset, Mu));
             ResultALGs.Add(new Algorithms().PMA2(DataSet.ToList(), ref MCDataset, Mu));
-            DrawingPlot();
+            DrawingPlot(DataSet, ResultALGs);
         }
 
         public MainWindowVM()
@@ -75,8 +76,7 @@ namespace InterlaboratoryUNIIM.ViewModel
             DataSet.CollectionChanged += DataSet_CollectionChanged;
 
             CalculateALL();
-            DrawingPlot();
-
+            DrawingPlot(DataSet, ResultALGs);
         }
 
         private void DataSet_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -84,28 +84,35 @@ namespace InterlaboratoryUNIIM.ViewModel
             NumOfParticipant = DataSet.Count;
         }
 
-        private void DrawingPlot()
+        private void DrawingPlot(ObservableCollection<DataUNIIM> dataUNIIMs, ObservableCollection<ResultALG> resultALGs)
         {
-            DrawingModel = new PlotModel { Title = "Графики" };
+            DrawingModel = new PlotModel { Title = "График" };
+            DataUNIIM MinItem = dataUNIIMs.OrderBy(min => min.Data - min.DataStandardDeviation).First();
+            DataUNIIM MaxItem = dataUNIIMs.OrderByDescending(max => max.Data + max.DataStandardDeviation).First();
 
-            //DrawingModel.Series.Add(new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)"));
+            double MinValue = Mu - Math.Abs(Mu - (MinItem.Data - MinItem.DataStandardDeviation)) * 1.3;
+            double MaxValue = Mu + Math.Abs(Mu - (MaxItem.Data + MaxItem.DataStandardDeviation)) * 1.3;
+
             var categoryAxis = new CategoryAxis
             {
                 Position = AxisPosition.Bottom,
                 Key = "y1",
-                Title = "Номер участника"
+                Title = "Номер участника",
+                FontSize = 10,
+                AbsoluteMinimum = -1,
+                AbsoluteMaximum = dataUNIIMs.Count() + resultALGs.Count() 
             };
+
             var valueAxis1 = new LinearAxis
             {
                 Title = "Результаты участников",
                 Position = AxisPosition.Left,
-                MinimumPadding = 0.06,
-                MaximumPadding = 0.06,
-                ExtraGridlines = new[] { 0d },
-                Key = "x1"
+                Key = "x1",
+                AbsoluteMinimum = MinValue,
+                AbsoluteMaximum = MaxValue,
+
             };
-            DrawingModel.Axes.Add(categoryAxis);
-            DrawingModel.Axes.Add(valueAxis1);
+
             ErrorBarSeries ErrorData = new ErrorBarSeries()
             {
                 XAxisKey = "x1",
@@ -113,17 +120,86 @@ namespace InterlaboratoryUNIIM.ViewModel
                 Font = "Arial",
                 FontSize = 1,
                 TextColor = OxyColors.Black,
-               FillColor = OxyColors.Aqua
+                FillColor = OxyColors.White,
             };
 
-
-
-            foreach (var item in DataSet)
+            int Category = 0;
+            foreach (var item in dataUNIIMs.OrderBy(x => x.Data))
             {
-                ErrorData.Items.Add(new ErrorBarItem { Value = item.Data, Error = item.DataStandardDeviation });
+                ErrorData.Items.Add(new ErrorBarItem
+                {
+                    Value = item.Data,
+                    Error = item.DataStandardDeviation,
+                    CategoryIndex = Category,
+                });
+                Category++;
+                categoryAxis.Labels.Add(item.ParticipantName);
             }
 
+            foreach (var ResultItem in resultALGs)
+            {
+                ErrorData.Items.Add(new ErrorBarItem
+                {
+                    Value = ResultItem.KCRV,
+                    Error = ResultItem.U1,
+                    CategoryIndex = Category
+                });
+                Category++;
+                categoryAxis.Labels.Add(ResultItem.Algorithm.ToString());
+            }
+
+            double X = 0.0D;
+            double Y = Mu;
+
+            LineAnnotation LineV = new LineAnnotation()
+            {
+                StrokeThickness = 1,
+                Color = OxyColors.Gray,
+                Type = LineAnnotationType.Vertical,
+                Text = (Y).ToString(),
+                TextColor = OxyColors.White,
+                X = dataUNIIMs.Count() - 0.5,
+                Y = 0
+            };
+            LineAnnotation LineMu = new LineAnnotation()
+            {
+                StrokeThickness = 1,
+                Color = OxyColors.Green,
+                Type = LineAnnotationType.Horizontal,
+                Text = (Y).ToString(),
+                TextColor = OxyColors.White,
+                X = X,
+                Y = Y,
+            };
+            LineAnnotation LineMuMin = new LineAnnotation()
+            {
+                StrokeThickness = 1,
+                Color = OxyColors.LightBlue,
+                Type = LineAnnotationType.Horizontal,
+                Text = (Y).ToString(),
+                TextColor = OxyColors.White,
+                X = X,
+                Y = Y - StandardDeviation
+            };
+            LineAnnotation LineMuMax = new LineAnnotation()
+            {
+                StrokeThickness = 1,
+                Color = OxyColors.LightBlue,
+                Type = LineAnnotationType.Horizontal,
+                Text = (Y).ToString(),
+                TextColor = OxyColors.White,
+                X = X,
+                Y = Y + StandardDeviation
+            };
+
+            DrawingModel.Axes.Add(categoryAxis);
+            DrawingModel.Axes.Add(valueAxis1);
+
             DrawingModel.Series.Add(ErrorData);
+            DrawingModel.Annotations.Add(LineMu);
+            DrawingModel.Annotations.Add(LineMuMin);
+            DrawingModel.Annotations.Add(LineMuMax);
+            DrawingModel.Annotations.Add(LineV);
         }
 
     }
